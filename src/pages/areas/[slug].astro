@@ -1,0 +1,130 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTASection from "../../components/CTASection.astro";
+import { locations } from "../../data/locations";
+import { services } from "../../data/services";
+import { business } from "../../data/business";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return locations.map((location) => ({
+    params: { slug: location.slug },
+    props: { location },
+  }));
+};
+
+const { location } = Astro.props;
+
+const title = `Home Improvement Services in ${location.name}, NL | ${business.name}`;
+const description = `Professional home renovation, roofing, siding, windows, decks, and painting services in ${location.name}, Newfoundland. Free estimates from ${business.name}.`;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: `${business.name} — ${location.name}`,
+  description: description,
+  telephone: business.phone,
+  areaServed: {
+    "@type": "City",
+    name: location.name,
+    containedInPlace: {
+      "@type": "Province",
+      name: "Newfoundland and Labrador",
+    },
+  },
+};
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <Breadcrumbs
+    items={[
+      { label: "Home", href: "/" },
+      { label: "Service Areas", href: "/areas/" },
+      { label: location.name },
+    ]}
+  />
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 text-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="max-w-3xl">
+        <p class="text-brand-200 font-medium mb-2">{location.region}</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+          Home Improvement Services in {location.name}
+        </h1>
+        <p class="text-lg text-blue-100 leading-relaxed mb-6">
+          {location.description}
+        </p>
+        <a
+          href="/contact/"
+          class="inline-block bg-accent-400 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-accent-500 transition-colors text-lg"
+        >
+          Get a Free Quote in {location.name}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services in this area -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-4">
+        Our Services in {location.name}
+      </h2>
+      <p class="text-gray-600 mb-8 max-w-2xl">
+        {business.name} offers a full range of home improvement services to
+        homeowners in {location.name} and the surrounding {location.region} area.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {services.map((service) => (
+          <a
+            href={`/services/${service.slug}/${location.slug}/`}
+            class="group block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-brand-300 transition-all duration-200"
+          >
+            <span class="text-3xl block mb-3">{service.icon}</span>
+            <h3 class="text-lg font-bold mb-1 group-hover:text-brand-600 transition-colors">
+              {service.name}
+            </h3>
+            <p class="text-sm text-gray-600 leading-relaxed mb-3">
+              {service.shortDescription}
+            </p>
+            <span class="text-brand-600 text-sm font-semibold">
+              {service.name} in {location.name} &rarr;
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Nearby Areas -->
+  {location.nearby.length > 0 && (
+    <section class="py-16 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6">
+          Also Serving Nearby Communities
+        </h2>
+        <div class="flex flex-wrap gap-3">
+          {location.nearby.map((name) => {
+            const nearby = locations.find((l) => l.name === name);
+            return nearby ? (
+              <a
+                href={`/areas/${nearby.slug}/`}
+                class="bg-white border border-gray-200 hover:border-brand-400 px-5 py-2.5 rounded-full text-sm font-medium transition-colors"
+              >
+                {nearby.name}
+              </a>
+            ) : (
+              <span class="bg-white border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium text-gray-500">
+                {name}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CTASection heading={`Ready to Start Your ${location.name} Project?`} />
+</BaseLayout>

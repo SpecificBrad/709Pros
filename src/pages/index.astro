@@ -1,0 +1,194 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CTASection from "../components/CTASection.astro";
+import { business } from "../data/business";
+import { services } from "../data/services";
+import { locations } from "../data/locations";
+
+const title = `${business.name} | ${business.tagline}`;
+const description = business.description;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: business.name,
+  description: business.description,
+  telephone: business.phone,
+  email: business.email,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: business.address.city,
+    addressRegion: business.address.province,
+    addressCountry: business.address.country,
+  },
+  areaServed: locations.map((l) => ({
+    "@type": "City",
+    name: l.name,
+  })),
+  openingHours: "Mo-Fr 08:00-17:00, Sa 09:00-14:00",
+};
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+          Newfoundland's Trusted<br />
+          <span class="text-accent-400">Home Improvement</span> Professionals
+        </h1>
+        <p class="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed">
+          From roof to deck, {business.name} delivers quality renovations, roofing,
+          siding, windows, and more — built for Newfoundland's toughest weather.
+          Locally owned. Fully insured. Free estimates.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/contact/"
+            class="bg-accent-400 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-accent-500 transition-colors text-lg text-center"
+          >
+            Get Your Free Quote
+          </a>
+          <a
+            href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
+            class="border-2 border-white text-white font-bold px-8 py-4 rounded-lg hover:bg-white hover:text-brand-800 transition-colors text-lg text-center"
+          >
+            Call {business.phone}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Signals Bar -->
+  <section class="bg-gray-50 border-b border-gray-100 py-6">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium text-gray-600">
+        {business.trustSignals.map((signal) => (
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            {signal}
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Overview -->
+  <section class="py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Professional home improvement services across Newfoundland — from small
+          repairs to major renovations.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {services.map((service) => (
+          <a
+            href={`/services/${service.slug}/`}
+            class="group block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-brand-300 transition-all duration-200"
+          >
+            <div class="text-4xl mb-4">{service.icon}</div>
+            <h3 class="text-xl font-bold mb-2 group-hover:text-brand-600 transition-colors">
+              {service.name}
+            </h3>
+            <p class="text-gray-600 text-sm leading-relaxed mb-4">
+              {service.shortDescription}
+            </p>
+            <span class="text-brand-600 text-sm font-semibold group-hover:translate-x-1 inline-block transition-transform">
+              Learn More &rarr;
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose {business.name}?</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          We're not just contractors — we're your neighbours. Here's why Newfoundland
+          homeowners trust us with their biggest investment.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg mb-2">Locally Owned</h3>
+          <p class="text-gray-600 text-sm">Born and raised in Newfoundland. We know the climate, the building codes, and the community.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg mb-2">Fully Insured</h3>
+          <p class="text-gray-600 text-sm">Licensed, insured, and compliant. Your property and our team are always protected.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg mb-2">Transparent Pricing</h3>
+          <p class="text-gray-600 text-sm">Free, detailed estimates with no hidden costs. You know exactly what you're paying for before work begins.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="font-bold text-lg mb-2">Quality Guaranteed</h3>
+          <p class="text-gray-600 text-sm">We stand behind every project with a workmanship guarantee. Your satisfaction is our standard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Areas Preview -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">Serving Communities Across Newfoundland</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          From St. John's to Gander and everywhere in between, {business.name} is
+          proud to serve homeowners across the province.
+        </p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        {locations.map((loc) => (
+          <a
+            href={`/areas/${loc.slug}/`}
+            class="bg-gray-100 hover:bg-brand-50 hover:text-brand-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+          >
+            {loc.name}
+          </a>
+        ))}
+      </div>
+      <div class="text-center mt-8">
+        <a href="/areas/" class="text-brand-600 font-semibold hover:underline">
+          View All Service Areas &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <CTASection />
+</BaseLayout>

@@ -1,0 +1,248 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+import CTASection from "../../../components/CTASection.astro";
+import FAQSection from "../../../components/FAQSection.astro";
+import { services } from "../../../data/services";
+import { locations } from "../../../data/locations";
+import { business } from "../../../data/business";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  const paths = [];
+  for (const service of services) {
+    for (const location of locations) {
+      paths.push({
+        params: { service: service.slug, city: location.slug },
+        props: { service, location },
+      });
+    }
+  }
+  return paths;
+};
+
+const { service, location } = Astro.props;
+
+const title = `${service.name} in ${location.name}, NL | ${business.name}`;
+const description = `Looking for ${service.name.toLowerCase()} in ${location.name}? ${business.name} provides professional ${service.name.toLowerCase()} services across ${location.region}. Free estimates — call today.`;
+
+// Localized FAQ: take the service FAQ and add location context
+const localFaq = [
+  ...service.faq,
+  {
+    question: `Does ${business.name} serve ${location.name}?`,
+    answer: `Yes! ${business.name} proudly serves homeowners in ${location.name} and the surrounding ${location.region} area including ${location.nearby.slice(0, 3).join(", ")}. Contact us for a free estimate on your ${service.name.toLowerCase()} project.`,
+  },
+  {
+    question: `How do I get a ${service.name.toLowerCase()} quote in ${location.name}?`,
+    answer: `Simply contact us through our website or call ${business.phone} to schedule a free, no-obligation estimate. We'll visit your ${location.name} property, assess the work needed, and provide a transparent quote.`,
+  },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: `${service.name} in ${location.name}`,
+  description: description,
+  provider: {
+    "@type": "LocalBusiness",
+    name: business.name,
+    telephone: business.phone,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: location.name,
+      addressRegion: "NL",
+      addressCountry: "CA",
+    },
+  },
+  areaServed: {
+    "@type": "City",
+    name: location.name,
+    containedInPlace: {
+      "@type": "Province",
+      name: "Newfoundland and Labrador",
+    },
+  },
+};
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <Breadcrumbs
+    items={[
+      { label: "Home", href: "/" },
+      { label: service.name, href: `/services/${service.slug}/` },
+      { label: location.name, href: `/areas/${location.slug}/` },
+      { label: `${service.name} in ${location.name}` },
+    ]}
+  />
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 text-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="max-w-3xl">
+        <span class="text-5xl mb-4 block">{service.icon}</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+          {service.name} in {location.name}, Newfoundland
+        </h1>
+        <p class="text-lg text-blue-100 leading-relaxed mb-6">
+          {business.name} provides professional {service.name.toLowerCase()} services
+          to homeowners in {location.name} and the surrounding {location.region} area.
+          {service.shortDescription} Contact us today for a free estimate.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/contact/"
+            class="bg-accent-400 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-accent-500 transition-colors text-lg text-center"
+          >
+            Get a Free Quote
+          </a>
+          <a
+            href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
+            class="border-2 border-white text-white font-bold px-8 py-4 rounded-lg hover:bg-white hover:text-brand-800 transition-colors text-lg text-center"
+          >
+            Call {business.phone}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About this service in this location -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div class="lg:col-span-2">
+          <h2 class="text-3xl font-bold mb-6">
+            Professional {service.name} Services in {location.name}
+          </h2>
+          <div class="prose prose-gray max-w-none">
+            <p class="text-gray-600 leading-relaxed mb-4">
+              {service.description}
+            </p>
+            <p class="text-gray-600 leading-relaxed mb-4">
+              {location.description}
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+              Whether you're in the heart of {location.name} or in the surrounding
+              communities of {location.nearby.slice(0, 3).join(", ")},
+              {business.name} is ready to help with your {service.name.toLowerCase()} needs.
+              We provide free, no-obligation estimates and stand behind every project
+              with our quality workmanship guarantee.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <div class="bg-brand-50 border border-brand-100 rounded-xl p-6">
+            <h3 class="font-bold text-lg mb-4 text-brand-800">Why {business.name}?</h3>
+            <ul class="space-y-3">
+              {business.trustSignals.map((signal) => (
+                <li class="flex items-center gap-2 text-sm text-gray-700">
+                  <svg class="w-4 h-4 text-brand-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  {signal}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
+            <h3 class="font-bold text-lg mb-2">Contact Us</h3>
+            <p class="text-sm text-gray-600 mb-4">
+              Ready to start your {service.name.toLowerCase()} project in {location.name}?
+            </p>
+            <a
+              href="/contact/"
+              class="block text-center bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-brand-700 transition-colors text-sm"
+            >
+              Request Free Estimate
+            </a>
+            <a
+              href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
+              class="block text-center mt-3 border border-gray-300 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+            >
+              Call {business.phone}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-8">
+        {service.name} Services We Offer in {location.name}
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {service.features.map((feature) => (
+          <div class="flex items-start gap-3 bg-white rounded-lg p-5 border border-gray-200">
+            <svg class="w-5 h-5 text-brand-600 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-700 font-medium">{feature}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Other services in this area -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">
+        Other Services in {location.name}
+      </h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {services
+          .filter((s) => s.slug !== service.slug)
+          .map((s) => (
+            <a
+              href={`/services/${s.slug}/${location.slug}/`}
+              class="block bg-white border border-gray-200 rounded-lg p-4 text-center hover:border-brand-400 hover:shadow-md transition-all duration-200"
+            >
+              <span class="text-2xl block mb-1">{s.icon}</span>
+              <span class="text-sm font-medium text-gray-700">{s.name}</span>
+            </a>
+          ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Nearby areas for this service -->
+  {location.nearby.length > 0 && (
+    <section class="py-12 bg-gray-50">
+      <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6">
+          {service.name} in Nearby Areas
+        </h2>
+        <div class="flex flex-wrap gap-3">
+          {location.nearby.map((name) => {
+            const nearby = locations.find((l) => l.name === name);
+            return nearby ? (
+              <a
+                href={`/services/${service.slug}/${nearby.slug}/`}
+                class="bg-white border border-gray-200 hover:border-brand-400 px-5 py-2.5 rounded-full text-sm font-medium transition-colors"
+              >
+                {service.name} in {nearby.name}
+              </a>
+            ) : (
+              <span class="bg-white border border-gray-200 px-5 py-2.5 rounded-full text-sm font-medium text-gray-500">
+                {service.name} in {name}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  <FAQSection faqs={localFaq} heading={`${service.name} in ${location.name} — FAQ`} />
+
+  <!-- CTA -->
+  <CTASection heading={`Get a Free ${service.name} Quote in ${location.name}`} />
+</BaseLayout>

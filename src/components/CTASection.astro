@@ -1,0 +1,34 @@
+---
+import { business } from "../data/business";
+
+interface Props {
+  heading?: string;
+  text?: string;
+}
+
+const {
+  heading = "Ready to Start Your Project?",
+  text = `Contact ${business.name} today for a free, no-obligation estimate. We'll discuss your project, answer your questions, and provide a transparent quote.`,
+} = Astro.props;
+---
+
+<section class="bg-brand-700 text-white py-16">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold mb-4">{heading}</h2>
+    <p class="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">{text}</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a
+        href="/contact/"
+        class="bg-accent-400 text-gray-900 font-semibold px-8 py-3.5 rounded-lg hover:bg-accent-500 transition-colors text-lg"
+      >
+        Get Your Free Quote
+      </a>
+      <a
+        href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
+        class="border-2 border-white text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-white hover:text-brand-700 transition-colors text-lg"
+      >
+        Call {business.phone}
+      </a>
+    </div>
+  </div>
+</section>

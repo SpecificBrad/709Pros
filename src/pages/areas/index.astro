@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTASection from "../../components/CTASection.astro";
+import { locations } from "../../data/locations";
+import { business } from "../../data/business";
+
+const title = `Service Areas | ${business.name} — Serving All of Newfoundland`;
+const description = `${business.name} provides professional home improvement services across Newfoundland. View our service areas including St. John's, Mount Pearl, Paradise, Conception Bay South, and more.`;
+
+const regions = [...new Set(locations.map((l) => l.region))];
+---
+
+<BaseLayout title={title} description={description}>
+  <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Service Areas" }]} />
+
+  <section class="py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="max-w-3xl mb-12">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+          Our Service Areas
+        </h1>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          {business.name} proudly serves homeowners across Newfoundland with
+          professional renovation, roofing, siding, and home improvement
+          services. Find your community below.
+        </p>
+      </div>
+
+      {regions.map((region) => (
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-6 text-brand-800">{region}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {locations
+              .filter((l) => l.region === region)
+              .map((loc) => (
+                <a
+                  href={`/areas/${loc.slug}/`}
+                  class="group block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-brand-300 transition-all duration-200"
+                >
+                  <h3 class="text-lg font-bold mb-1 group-hover:text-brand-600 transition-colors">
+                    {loc.name}
+                  </h3>
+                  <p class="text-sm text-gray-500 mb-3">{loc.region}</p>
+                  <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                    {loc.description}
+                  </p>
+                  <span class="inline-block mt-3 text-brand-600 text-sm font-semibold">
+                    View Services &rarr;
+                  </span>
+                </a>
+              ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <CTASection heading="Don't See Your Area?" text={`We serve communities across all of Newfoundland. Contact ${business.name} to discuss your project — chances are, we're already working in your neighbourhood.`} />
+</BaseLayout>

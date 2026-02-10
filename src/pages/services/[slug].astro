@@ -1,0 +1,116 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTASection from "../../components/CTASection.astro";
+import FAQSection from "../../components/FAQSection.astro";
+import { services } from "../../data/services";
+import { locations } from "../../data/locations";
+import { business } from "../../data/business";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service },
+  }));
+};
+
+const { service } = Astro.props;
+
+const title = `${service.name} Services in Newfoundland | ${business.name}`;
+const description = `Professional ${service.name.toLowerCase()} services across Newfoundland. ${service.shortDescription} Free estimates from ${business.name}.`;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: `${service.name} Services`,
+  description: service.description,
+  provider: {
+    "@type": "LocalBusiness",
+    name: business.name,
+    telephone: business.phone,
+  },
+  areaServed: {
+    "@type": "Province",
+    name: "Newfoundland and Labrador",
+  },
+};
+---
+
+<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+  <Breadcrumbs
+    items={[
+      { label: "Home", href: "/" },
+      { label: "Services", href: "/#services" },
+      { label: service.name },
+    ]}
+  />
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 text-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="max-w-3xl">
+        <span class="text-5xl mb-4 block">{service.icon}</span>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">
+          Professional {service.name} Services in Newfoundland
+        </h1>
+        <p class="text-lg text-blue-100 leading-relaxed mb-6">
+          {service.description}
+        </p>
+        <a
+          href="/contact/"
+          class="inline-block bg-accent-400 text-gray-900 font-bold px-8 py-4 rounded-lg hover:bg-accent-500 transition-colors text-lg"
+        >
+          Get a Free {service.name} Quote
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-8">What We Offer</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {service.features.map((feature) => (
+          <div class="flex items-start gap-3 bg-gray-50 rounded-lg p-5">
+            <svg class="w-5 h-5 text-brand-600 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+            <span class="text-gray-700 font-medium">{feature}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Areas for this service -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-3xl font-bold mb-4">
+        {service.name} Service Areas
+      </h2>
+      <p class="text-gray-600 mb-8 max-w-2xl">
+        We provide {service.name.toLowerCase()} services to homeowners across Newfoundland.
+        Select your area below for location-specific information.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {locations.map((loc) => (
+          <a
+            href={`/services/${service.slug}/${loc.slug}/`}
+            class="block bg-white border border-gray-200 rounded-lg px-5 py-4 hover:border-brand-400 hover:shadow-md transition-all duration-200"
+          >
+            <span class="font-semibold text-gray-900">{loc.name}</span>
+            <span class="block text-xs text-gray-500 mt-0.5">{loc.region}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <FAQSection faqs={service.faq} heading={`${service.name} FAQ`} />
+
+  <!-- CTA -->
+  <CTASection heading={`Need ${service.name} Help?`} />
+</BaseLayout>
