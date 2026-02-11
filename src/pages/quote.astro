@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { business } from "../data/business";
+
+const title = `Get a Free Quote | ${business.name}`;
+const description = `Request a free, no-obligation quote from ${business.name}. Professional home improvement services across Newfoundland.`;
+---
+
+<BaseLayout title={title} description={description}>
+  <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Get a Quote" }]} />
+
+  <section class="py-16 md:py-20">
+    <div class="max-w-3xl mx-auto px-4">
+      <div class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Get Your Free Quote</h1>
+        <p class="text-lg text-gray-600 leading-relaxed">Tell us about your project and we'll get back to you with a free, no-obligation estimate.</p>
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+        <div style="width:100%;height:500px;" data-fillout-id="bQZZKLhwuBus" data-fillout-embed-type="standard" data-fillout-inherit-parameters data-fillout-dynamic-resize></div>
+        <script src="https://server.fillout.com/embed/v1/"></script>
+      </div>
+
+      <div class="mt-8 text-center text-sm text-gray-500">
+        <p>Prefer to talk? Call us directly at <a href="tel:${business.phone.replace(/[^+\d]/g, "")}" class="text-brand-600 font-semibold hover:underline">{business.phone}</a></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
