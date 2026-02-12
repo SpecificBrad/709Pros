@@ -98,8 +98,8 @@ Fillout form → Make.com webhook → Supabase "leads" table
 | homeowner | f3j8 | Are you the homeowner? |
 | property_type | pOm7 | Property type |
 | photo_urls | 2Aa4 | Project Photos |
-| postal_code | ? | Postal code (ID unknown) |
-| description | ? | Describe the Issue (ID unknown) |
+| postal_code | dyap | Postal code |
+| description | ? | Describe the Issue (ID unknown — match by name) |
 
 ### Fillout Webhook Payload Structure
 Fillout sends a nested structure (NOT flat key-value):
@@ -119,6 +119,38 @@ Fillout sends a nested structure (NOT flat key-value):
 ```
 Field values must be extracted from `submission.questions` array by matching `id`.
 
+### Make.com Field Mapping — CORRECT Syntax
+The Make.com webhook module (4) receives the Fillout payload **without** a `body` wrapper.
+The correct path is `4.submission.questions` — **NOT** `4.body.submission.questions`.
+
+**Correct formula example:**
+```
+{{map(4.submission.questions; "value"; "id"; "gBFz")}}
+```
+
+**Wrong (current, causes all NULLs):**
+```
+{{map(4.body.submission.questions; "value"; "id"; "gBFz")}}
+```
+
+Full mapping table:
+| Supabase Column | Make.com Formula |
+|----------------|-----------------|
+| full_name | `{{map(4.submission.questions; "value"; "id"; "gBFz")}}` |
+| phone | `{{map(4.submission.questions; "value"; "id"; "5M4s")}}` |
+| email | `{{map(4.submission.questions; "value"; "id"; "hhBy")}}` |
+| service | `{{map(4.submission.questions; "value"; "id"; "jmOc")}}` |
+| service_area | `{{map(4.submission.questions; "value"; "id"; "oF6y")}}` |
+| timeline | `{{map(4.submission.questions; "value"; "id"; "iJcBc")}}` |
+| budget_range | `{{map(4.submission.questions; "value"; "id"; "vRdb")}}` |
+| property_type | `{{map(4.submission.questions; "value"; "id"; "pOm7")}}` |
+| homeowner | `{{map(4.submission.questions; "value"; "id"; "f3j8")}}` |
+| photo_urls | `{{map(4.submission.questions; "value"; "id"; "2Aa4")}}` |
+| postal_code | `{{map(4.submission.questions; "value"; "id"; "dyap")}}` |
+| description | `{{map(4.submission.questions; "value"; "name"; "Describe the Issue")}}` |
+
+To redetermine the webhook data structure: right-click Webhooks module → Redetermine data structure → submit a form entry.
+
 ## Git Workflow
 - **Feature branch:** `claude/build-709pros-seo-site-S3O91`
 - **Production:** `main` (Netlify auto-deploys)
@@ -131,6 +163,9 @@ Field values must be extracted from `submission.questions` array by matching `id
 - Make.com's Supabase connector adds `.supabase.co` automatically — don't include it in the Project ID field.
 - Fillout's "Test" button on webhook setup only pings the URL — it does NOT send form data. Submit a real form entry to test.
 - Fillout sends nested `submission.questions[]` array, not flat fields. Make.com `map()` function needed to extract values by question ID.
+- **CRITICAL:** Make.com webhook module (4) does NOT wrap the payload in `body`. Use `4.submission.questions`, not `4.body.submission.questions`. The `body.` prefix causes all fields to be NULL.
+- After changing the webhook or connection, you must **redetermine the data structure**: right-click the Webhooks module → "Redetermine data structure" → submit a real form entry. Without this, the mapping variable panel only shows `executionId`.
+- Make.com's Supabase connection Project ID field wants JUST the project ID (e.g., `ajvitritgrzcauevljka`), not `ajvitritgrzcauevljka.supabase.co`. The module adds the domain suffix automatically.
 
 ### Database
 - Drop NOT NULL constraints during initial integration testing. Allows partial inserts so you can see which fields map correctly vs. which return NULL. Tighten constraints after mappings are confirmed.
@@ -147,10 +182,18 @@ Field values must be extracted from `submission.questions` array by matching `id
 - Use CLI-based tools (Claude Code, APIs) for programmatic configuration whenever possible.
 
 ## Pending Work
-- [ ] Fix Make.com field mappings — data inserts but all fields are NULL (map() function path issue)
-- [ ] Find missing Fillout question IDs for postal_code and description fields
-- [ ] Tighten NOT NULL constraints on leads table after mappings confirmed
+- [ ] **FIX FIRST:** Make.com field mappings — change `4.body.submission.questions` to `4.submission.questions` in every Supabase module field. This is the ONE fix needed to make the pipeline fully work. Clear each field (Ctrl+A, Delete) and paste the corrected formula from the mapping table above.
+- [ ] Clean up test rows in Supabase leads table (NULL rows + "Test User" rows)
+- [ ] Tighten NOT NULL constraints on leads table after mappings confirmed (full_name, phone, service, service_area)
+- [ ] Find Fillout question ID for "Describe the Issue" (currently matching by name)
 - [ ] Create OG image (/og-default.png)
 - [ ] Replace testimonials placeholder with real content
 - [ ] Custom domain setup
 - [ ] Analytics/tracking integration
+
+## Local Dev Setup (Brad's Machine)
+- **Claude Code** installed: `claude` command in PowerShell
+- **Git Bash path:** `C:\Program Files\Git\bin\bash.exe`
+- **Repo cloned to:** `C:\Users\brad\Desktop\709Pros`
+- **Environment variable needed each session:** `$env:CLAUDE_CODE_GIT_BASH_PATH = "C:\Program Files\Git\bin\bash.exe"`
+- To make permanent: add to PowerShell profile (`$PROFILE`)
