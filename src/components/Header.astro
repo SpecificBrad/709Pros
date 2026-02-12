@@ -1,13 +1,12 @@
 ---
 import { business } from "../data/business";
-import { services } from "../data/services";
 ---
 
 <header class="bg-white border-b border-gray-100 sticky top-0 z-50">
   <!-- Top bar -->
   <div class="bg-brand-800 text-white text-sm py-1.5">
     <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
-      <span class="hidden sm:inline">{business.tagline}</span>
+      <span class="hidden sm:inline">Get Matched with Trusted Newfoundland Contractors</span>
       <a
         href={`tel:${business.phone.replace(/[^+\d]/g, "")}`}
         class="font-semibold hover:text-accent-400 transition-colors"
@@ -27,30 +26,12 @@ import { services } from "../data/services";
       <!-- Desktop menu -->
       <div class="hidden md:flex items-center gap-6 text-sm font-medium">
         <a href="/" class="hover:text-brand-600 transition-colors">Home</a>
-        <div class="relative group">
-          <button class="hover:text-brand-600 transition-colors flex items-center gap-1">
-            Services
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          <div class="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-lg shadow-lg py-2 min-w-[220px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-            {services.map((s) => (
-              <a
-                href={`/services/${s.slug}/`}
-                class="block px-4 py-2 text-sm hover:bg-brand-50 hover:text-brand-700 transition-colors"
-              >
-                {s.name}
-              </a>
-            ))}
-          </div>
-        </div>
         <a href="/areas/" class="hover:text-brand-600 transition-colors">Service Areas</a>
         <a
           href="/quote/"
           class="bg-brand-600 text-white px-5 py-2 rounded-lg hover:bg-brand-700 transition-colors"
         >
-          Get a Free Quote
+          Get Matched Now
         </a>
       </div>
 
@@ -69,20 +50,12 @@ import { services } from "../data/services";
     <!-- Mobile menu -->
     <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4 border-t border-gray-100 pt-4 space-y-3">
       <a href="/" class="block text-sm font-medium hover:text-brand-600">Home</a>
-      {services.map((s) => (
-        <a
-          href={`/services/${s.slug}/`}
-          class="block text-sm pl-3 text-gray-600 hover:text-brand-600"
-        >
-          {s.name}
-        </a>
-      ))}
       <a href="/areas/" class="block text-sm font-medium hover:text-brand-600">Service Areas</a>
       <a
         href="/quote/"
         class="block text-center bg-brand-600 text-white px-5 py-2.5 rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
       >
-        Get a Free Quote
+        Get Matched Now
       </a>
     </div>
   </nav>
