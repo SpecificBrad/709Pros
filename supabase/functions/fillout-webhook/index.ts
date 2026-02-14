@@ -9,15 +9,16 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const FIELD_MAP: Record<string, string> = {
   gBFz: "full_name",
   "5M4s": "phone",
-  hhBy: "email",
+  hHbY: "email",
   jmOc: "service",
   oF6y: "service_area",
-  iJcBc: "timeline",
+  fKbE: "timeline",
   vRdb: "budget_range",
-  f3j8: "homeowner",
+  f3q8: "homeowner",
   pOm7: "property_type",
-  dyap: "postal_code",
+  "4vag": "postal_code",
   "2Aa4": "photo_urls",
+  x1pw: "description",
 };
 
 Deno.serve(async (req) => {
@@ -44,10 +45,6 @@ Deno.serve(async (req) => {
         } else {
           row[col] = q.value ?? null;
         }
-      }
-      // Match description by name since question ID is unknown
-      if (q.name === "Describe the Issue" || q.name === "Description") {
-        row["description"] = q.value ?? null;
       }
     }
 

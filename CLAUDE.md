@@ -94,16 +94,16 @@ Used by the Edge Function to parse `submission.questions[]`:
 |-----------|-------------|--------------|
 | full_name | gBFz | Full Name |
 | phone | 5M4s | Phone number |
-| email | hhBy | Email |
+| email | hHbY | Email |
 | service | jmOc | Service |
 | service_area | oF6y | City/Service Area |
-| timeline | iJcBc | Timeline |
+| timeline | fKbE | Timeline |
 | budget_range | vRdb | Budget range |
-| homeowner | f3j8 | Are you the homeowner? |
+| homeowner | f3q8 | Are you the homeowner? |
 | property_type | pOm7 | Property type |
 | photo_urls | 2Aa4 | Project Photos |
-| postal_code | dyap | Postal code |
-| description | *(matched by name)* | Describe the Issue |
+| postal_code | 4vag | Postal code |
+| description | x1pw | Describe the Issue |
 
 ### Fillout Webhook Payload Structure
 Fillout sends a nested structure (NOT flat key-value):
@@ -121,7 +121,7 @@ Fillout sends a nested structure (NOT flat key-value):
   }
 }
 ```
-The Edge Function extracts values from `submission.questions` by matching `id` (or `name` for description).
+The Edge Function extracts values from `submission.questions` by matching `id`.
 
 ### Make.com (DEPRECATED — do not use)
 Make.com was the original middleware but was abandoned due to persistent field mapping issues (all values arrived as NULL even after extensive debugging). The Supabase Edge Function replaces it entirely.
@@ -142,6 +142,9 @@ Make.com was the original middleware but was abandoned due to persistent field m
 - Supabase Edge Function secrets cannot start with `SUPABASE_` prefix — use `SB_SERVICE_ROLE_KEY` instead.
 - Edge Functions that receive external webhooks (like Fillout) must have **JWT verification disabled**.
 - **Make.com was abandoned** after extensive debugging — field mappings consistently returned NULL for all values, even simple top-level field references. The Edge Function approach is simpler and more reliable.
+- **Fillout question IDs are case-sensitive** and had typos in original documentation — e.g., `hhBy` vs `hHbY`, `iJcBc` vs `fKbE`. Always verify IDs from a real payload capture.
+- **Fillout caches webhook endpoints aggressively** (30-60 min). After redeploying an Edge Function, Fillout may still hit the old version. To force a cache clear: delete the webhook in Fillout, wait, then re-add it with a `?v=2` query parameter.
+- **Supabase Edge Functions have built-in env vars** — `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_URL` are automatically available, separate from user-defined secrets.
 
 ### Database
 - Drop NOT NULL constraints during initial integration testing. Allows partial inserts so you can see which fields map correctly vs. which return NULL. Tighten constraints after mappings are confirmed.
@@ -158,12 +161,14 @@ Make.com was the original middleware but was abandoned due to persistent field m
 - Use CLI-based tools (Claude Code, APIs) for programmatic configuration whenever possible.
 
 ## Pending Work
-- [ ] **Deploy Edge Function** to Supabase (via CLI or dashboard editor)
-- [ ] **Disable JWT verification** on the Edge Function
-- [ ] **Update Fillout webhook URL** to `https://ajvitritgrzcauevljka.supabase.co/functions/v1/fillout-webhook`
-- [ ] **Test pipeline end-to-end** — submit form, verify row in leads table has populated fields
-- [ ] Clean up test rows in Supabase leads table (NULL rows + "Test User" rows)
+- [x] Deploy Edge Function to Supabase (deployed via CLI with `--no-verify-jwt`)
+- [x] Disable JWT verification on the Edge Function
+- [x] Update Fillout webhook URL (now `...fillout-webhook?v=2` to bypass cache)
+- [x] Fix question ID mismatches (timeline, homeowner, postal_code, description IDs were wrong)
+- [ ] **Verify real Fillout submission populates all fields** — Fillout cache may take 30-60 min to expire; delete and re-add webhook in Fillout to force cache clear
+- [ ] Clean up test rows in Supabase leads table (NULL rows + test data)
 - [ ] Tighten NOT NULL constraints on leads table after pipeline confirmed (full_name, phone, service, service_area)
+- [ ] Remove `webhook_logs` and `raw_payload` debugging artifacts after pipeline confirmed
 - [ ] Disable/delete Make.com scenario
 - [ ] Create OG image (/og-default.png)
 - [ ] Replace testimonials placeholder with real content
