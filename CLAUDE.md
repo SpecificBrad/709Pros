@@ -8,7 +8,7 @@ Local lead generation site for homeowners in Newfoundland. Homeowners submit a q
 - **Styling:** Tailwind CSS 3.x
 - **Sitemap:** @astrojs/sitemap
 - **Form:** Fillout (embedded at /quote/, form ID: bQZZKLhwuBus)
-- **Automation:** Make.com (webhook from Fillout → Supabase insert)
+- **Automation:** Supabase Edge Function (Fillout webhook → direct DB insert)
 - **Database:** Supabase (project ID: ajvitritgrzcauevljka)
 - **Hosting:** Netlify (auto-deploys from `main` branch)
 - **Live URL:** https://709pros.netlify.app
@@ -56,8 +56,16 @@ Every page includes JSON-LD: LocalBusiness, Service, FAQPage, BreadcrumbList.
 
 ## Lead Pipeline
 ```
-Fillout form → Make.com webhook → Supabase "leads" table
+Fillout form → Supabase Edge Function → Supabase "leads" table
 ```
+
+### Edge Function
+- **Name:** `fillout-webhook`
+- **Code:** `supabase/functions/fillout-webhook/index.ts`
+- **Endpoint:** `https://ajvitritgrzcauevljka.supabase.co/functions/v1/fillout-webhook`
+- **Secret:** `SB_SERVICE_ROLE_KEY` (stored in Edge Function Secrets — note: Supabase doesn't allow `SUPABASE_` prefix)
+- **JWT Verification:** Disabled (Fillout doesn't send Supabase JWTs)
+- **What it does:** Receives Fillout POST payload, parses nested `submission.questions[]` array, maps question IDs to DB columns, inserts into `public.leads`
 
 ### Supabase Schema (public.leads)
 | Column | Type | Default | Nullable |
@@ -80,14 +88,10 @@ Fillout form → Make.com webhook → Supabase "leads" table
 | contractor_id | uuid | | YES |
 | paid | boolean | false | YES |
 
-### Make.com Webhook
-- Scenario ID: 4125813
-- Webhook URL: https://hook.us2.make.com/jdjhsdsdu21o2hc554ams7laytfbkrm3
-- Flow: Webhooks (module 4) → Supabase Create a Row (module 6)
-
-### Fillout Question IDs (for Make.com field mapping)
-| Field | Fillout Question ID | Fillout Name |
-|-------|---------------------|--------------|
+### Fillout Question ID → DB Column Mapping
+Used by the Edge Function to parse `submission.questions[]`:
+| DB Column | Question ID | Fillout Name |
+|-----------|-------------|--------------|
 | full_name | gBFz | Full Name |
 | phone | 5M4s | Phone number |
 | email | hhBy | Email |
@@ -99,7 +103,7 @@ Fillout form → Make.com webhook → Supabase "leads" table
 | property_type | pOm7 | Property type |
 | photo_urls | 2Aa4 | Project Photos |
 | postal_code | dyap | Postal code |
-| description | ? | Describe the Issue (ID unknown — match by name) |
+| description | *(matched by name)* | Describe the Issue |
 
 ### Fillout Webhook Payload Structure
 Fillout sends a nested structure (NOT flat key-value):
@@ -117,39 +121,13 @@ Fillout sends a nested structure (NOT flat key-value):
   }
 }
 ```
-Field values must be extracted from `submission.questions` array by matching `id`.
+The Edge Function extracts values from `submission.questions` by matching `id` (or `name` for description).
 
-### Make.com Field Mapping — CORRECT Syntax
-The Make.com webhook module (4) receives the Fillout payload **without** a `body` wrapper.
-The correct path is `4.submission.questions` — **NOT** `4.body.submission.questions`.
-
-**Correct formula example:**
-```
-{{map(4.submission.questions; "value"; "id"; "gBFz")}}
-```
-
-**Wrong (current, causes all NULLs):**
-```
-{{map(4.body.submission.questions; "value"; "id"; "gBFz")}}
-```
-
-Full mapping table:
-| Supabase Column | Make.com Formula |
-|----------------|-----------------|
-| full_name | `{{map(4.submission.questions; "value"; "id"; "gBFz")}}` |
-| phone | `{{map(4.submission.questions; "value"; "id"; "5M4s")}}` |
-| email | `{{map(4.submission.questions; "value"; "id"; "hhBy")}}` |
-| service | `{{map(4.submission.questions; "value"; "id"; "jmOc")}}` |
-| service_area | `{{map(4.submission.questions; "value"; "id"; "oF6y")}}` |
-| timeline | `{{map(4.submission.questions; "value"; "id"; "iJcBc")}}` |
-| budget_range | `{{map(4.submission.questions; "value"; "id"; "vRdb")}}` |
-| property_type | `{{map(4.submission.questions; "value"; "id"; "pOm7")}}` |
-| homeowner | `{{map(4.submission.questions; "value"; "id"; "f3j8")}}` |
-| photo_urls | `{{map(4.submission.questions; "value"; "id"; "2Aa4")}}` |
-| postal_code | `{{map(4.submission.questions; "value"; "id"; "dyap")}}` |
-| description | `{{map(4.submission.questions; "value"; "name"; "Describe the Issue")}}` |
-
-To redetermine the webhook data structure: right-click Webhooks module → Redetermine data structure → submit a form entry.
+### Make.com (DEPRECATED — do not use)
+Make.com was the original middleware but was abandoned due to persistent field mapping issues (all values arrived as NULL even after extensive debugging). The Supabase Edge Function replaces it entirely.
+- Old webhook URL: `https://hook.us2.make.com/jdjhsdsdu21o2hc554ams7laytfbkrm3`
+- Old scenario ID: 4125813
+- **Status:** Disabled / to be deleted
 
 ## Git Workflow
 - **Feature branch:** `claude/build-709pros-seo-site-S3O91`
@@ -159,13 +137,11 @@ To redetermine the webhook data structure: right-click Webhooks module → Redet
 ## Lessons Learned
 
 ### Integration Debugging
-- When Make.com Supabase module shows `ENOTFOUND: https://.supabase.co/rest/v1/` — the **Project ID** in the connection is blank or wrong. It should be just the project ID (e.g., `ajvitritgrzcauevljka`), not the full URL.
-- Make.com's Supabase connector adds `.supabase.co` automatically — don't include it in the Project ID field.
 - Fillout's "Test" button on webhook setup only pings the URL — it does NOT send form data. Submit a real form entry to test.
-- Fillout sends nested `submission.questions[]` array, not flat fields. Make.com `map()` function needed to extract values by question ID.
-- **CRITICAL:** Make.com webhook module (4) does NOT wrap the payload in `body`. Use `4.submission.questions`, not `4.body.submission.questions`. The `body.` prefix causes all fields to be NULL.
-- After changing the webhook or connection, you must **redetermine the data structure**: right-click the Webhooks module → "Redetermine data structure" → submit a real form entry. Without this, the mapping variable panel only shows `executionId`.
-- Make.com's Supabase connection Project ID field wants JUST the project ID (e.g., `ajvitritgrzcauevljka`), not `ajvitritgrzcauevljka.supabase.co`. The module adds the domain suffix automatically.
+- Fillout sends nested `submission.questions[]` array, not flat fields. The Edge Function parses this by matching question `id`.
+- Supabase Edge Function secrets cannot start with `SUPABASE_` prefix — use `SB_SERVICE_ROLE_KEY` instead.
+- Edge Functions that receive external webhooks (like Fillout) must have **JWT verification disabled**.
+- **Make.com was abandoned** after extensive debugging — field mappings consistently returned NULL for all values, even simple top-level field references. The Edge Function approach is simpler and more reliable.
 
 ### Database
 - Drop NOT NULL constraints during initial integration testing. Allows partial inserts so you can see which fields map correctly vs. which return NULL. Tighten constraints after mappings are confirmed.
@@ -182,10 +158,13 @@ To redetermine the webhook data structure: right-click Webhooks module → Redet
 - Use CLI-based tools (Claude Code, APIs) for programmatic configuration whenever possible.
 
 ## Pending Work
-- [ ] **FIX FIRST:** Make.com field mappings — change `4.body.submission.questions` to `4.submission.questions` in every Supabase module field. This is the ONE fix needed to make the pipeline fully work. Clear each field (Ctrl+A, Delete) and paste the corrected formula from the mapping table above.
+- [ ] **Deploy Edge Function** to Supabase (via CLI or dashboard editor)
+- [ ] **Disable JWT verification** on the Edge Function
+- [ ] **Update Fillout webhook URL** to `https://ajvitritgrzcauevljka.supabase.co/functions/v1/fillout-webhook`
+- [ ] **Test pipeline end-to-end** — submit form, verify row in leads table has populated fields
 - [ ] Clean up test rows in Supabase leads table (NULL rows + "Test User" rows)
-- [ ] Tighten NOT NULL constraints on leads table after mappings confirmed (full_name, phone, service, service_area)
-- [ ] Find Fillout question ID for "Describe the Issue" (currently matching by name)
+- [ ] Tighten NOT NULL constraints on leads table after pipeline confirmed (full_name, phone, service, service_area)
+- [ ] Disable/delete Make.com scenario
 - [ ] Create OG image (/og-default.png)
 - [ ] Replace testimonials placeholder with real content
 - [ ] Custom domain setup
