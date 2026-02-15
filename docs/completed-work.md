@@ -8,3 +8,5 @@
 - [x] Fix question ID mismatches — refactored Edge Function to match by question **name** instead of ID
 - [x] Supabase MCP server configured and connected (project-scoped `.mcp.json`)
 - [x] Netlify MCP server connected
+- [x] Fix Fillout webhook pipeline — all 12 fields now populate correctly (description casing fix + webhook cache clear)
+- [x] Slim CLAUDE.md from ~190 lines to ~30 lines; reference docs moved to `docs/`
