@@ -25,7 +25,7 @@ npm run build     # Static build → dist/
 Cross-product pages from `services × locations` arrays:
 - Route: `/services/[service]/[city]`
 - 8 services × 6 locations = 48 cross-product pages
-- Plus: 8 service pages + 6 area pages + homepage + quote + areas index = **66 total pages**
+- Plus: 8 service pages + 6 area pages + homepage + quote + contact + areas index = **66 total pages**
 
 ### Data Layer (src/data/)
 All pages auto-generate from these three files:
@@ -40,6 +40,7 @@ All pages auto-generate from these three files:
 src/layouts/BaseLayout.astro          — Base HTML, SEO meta, OG tags, JSON-LD slot
 src/pages/index.astro                 — Homepage (lead-gen landing page, 5 sections)
 src/pages/quote.astro                 — Fillout form embed
+src/pages/contact/index.astro         — Contact page with quote form link
 src/pages/services/[slug].astro       — Individual service pages
 src/pages/services/[service]/[city].astro — Cross-product pSEO pages
 src/pages/areas/[slug].astro          — Individual area pages
@@ -65,7 +66,7 @@ Fillout form → Supabase Edge Function → Supabase "leads" table
 - **Endpoint:** `https://ajvitritgrzcauevljka.supabase.co/functions/v1/fillout-webhook`
 - **Secret:** `SB_SERVICE_ROLE_KEY` (stored in Edge Function Secrets — note: Supabase doesn't allow `SUPABASE_` prefix)
 - **JWT Verification:** Disabled (Fillout doesn't send Supabase JWTs)
-- **What it does:** Receives Fillout POST payload, parses nested `submission.questions[]` array, maps question IDs to DB columns, inserts into `public.leads`
+- **What it does:** Receives Fillout POST payload, parses nested `submission.questions[]` array, maps question **names** (not IDs) to DB columns, inserts into `public.leads`
 
 ### Supabase Schema (public.leads)
 | Column | Type | Default | Nullable |
@@ -88,22 +89,22 @@ Fillout form → Supabase Edge Function → Supabase "leads" table
 | contractor_id | uuid | | YES |
 | paid | boolean | false | YES |
 
-### Fillout Question ID → DB Column Mapping
-Used by the Edge Function to parse `submission.questions[]`:
-| DB Column | Question ID | Fillout Name |
-|-----------|-------------|--------------|
-| full_name | gBFz | Full Name |
-| phone | 5M4s | Phone number |
-| email | hHbY | Email |
-| service | jmOc | Service |
-| service_area | oF6y | City/Service Area |
-| timeline | fKbE | Timeline |
-| budget_range | vRdb | Budget range |
-| homeowner | f3q8 | Are you the homeowner? |
-| property_type | pOm7 | Property type |
-| photo_urls | 2Aa4 | Project Photos |
-| postal_code | 4vag | Postal code |
-| description | x1pw | Describe the Issue |
+### Fillout Question Name → DB Column Mapping
+The Edge Function matches by question **name** (not ID) to avoid case-sensitivity issues with Fillout's random IDs:
+| DB Column | Fillout Question Name |
+|-----------|----------------------|
+| full_name | Full Name |
+| phone | Phone number |
+| email | Email |
+| service | Service |
+| service_area | City/Service Area |
+| timeline | Timeline |
+| budget_range | Budget range |
+| homeowner | Are you the homeowner? |
+| property_type | Property type |
+| photo_urls | Project Photos |
+| postal_code | Postal code |
+| description | Describe the Issue |
 
 ### Fillout Webhook Payload Structure
 Fillout sends a nested structure (NOT flat key-value):
@@ -121,7 +122,7 @@ Fillout sends a nested structure (NOT flat key-value):
   }
 }
 ```
-The Edge Function extracts values from `submission.questions` by matching `id`.
+The Edge Function extracts values from `submission.questions` by matching the `name` field (not `id`).
 
 ### Make.com (DEPRECATED — do not use)
 Make.com was the original middleware but was abandoned due to persistent field mapping issues (all values arrived as NULL even after extensive debugging). The Supabase Edge Function replaces it entirely.
@@ -138,11 +139,11 @@ Make.com was the original middleware but was abandoned due to persistent field m
 
 ### Integration Debugging
 - Fillout's "Test" button on webhook setup only pings the URL — it does NOT send form data. Submit a real form entry to test.
-- Fillout sends nested `submission.questions[]` array, not flat fields. The Edge Function parses this by matching question `id`.
+- Fillout sends nested `submission.questions[]` array, not flat fields. The Edge Function parses this by matching question **name** (not ID).
 - Supabase Edge Function secrets cannot start with `SUPABASE_` prefix — use `SB_SERVICE_ROLE_KEY` instead.
 - Edge Functions that receive external webhooks (like Fillout) must have **JWT verification disabled**.
 - **Make.com was abandoned** after extensive debugging — field mappings consistently returned NULL for all values, even simple top-level field references. The Edge Function approach is simpler and more reliable.
-- **Fillout question IDs are case-sensitive** and had typos in original documentation — e.g., `hhBy` vs `hHbY`, `iJcBc` vs `fKbE`. Always verify IDs from a real payload capture.
+- **Fillout question IDs are case-sensitive** and had typos in original documentation — matching by question **name** is more reliable. The Edge Function was refactored from ID-based to name-based matching for this reason.
 - **Fillout caches webhook endpoints aggressively** (30-60 min). After redeploying an Edge Function, Fillout may still hit the old version. To force a cache clear: delete the webhook in Fillout, wait, then re-add it with a `?v=2` query parameter.
 - **Supabase Edge Functions have built-in env vars** — `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_URL` are automatically available, separate from user-defined secrets.
 
@@ -160,11 +161,15 @@ Make.com was the original middleware but was abandoned due to persistent field m
 - For multi-field form configurations, manual entry is faster and more reliable than browser automation.
 - Use CLI-based tools (Claude Code, APIs) for programmatic configuration whenever possible.
 
-## Pending Work
+## Completed Work
 - [x] Deploy Edge Function to Supabase (deployed via CLI with `--no-verify-jwt`)
 - [x] Disable JWT verification on the Edge Function
 - [x] Update Fillout webhook URL (now `...fillout-webhook?v=2` to bypass cache)
-- [x] Fix question ID mismatches (timeline, homeowner, postal_code, description IDs were wrong)
+- [x] Fix question ID mismatches — refactored Edge Function to match by question **name** instead of ID
+- [x] Add contact page (`/contact/`)
+- [x] Full pSEO site build (8 services × 6 locations = 48 cross-product pages + service/area/static pages)
+
+## Pending Work
 - [ ] **Verify real Fillout submission populates all fields** — Fillout cache may take 30-60 min to expire; delete and re-add webhook in Fillout to force cache clear
 - [ ] Clean up test rows in Supabase leads table (NULL rows + test data)
 - [ ] Tighten NOT NULL constraints on leads table after pipeline confirmed (full_name, phone, service, service_area)
