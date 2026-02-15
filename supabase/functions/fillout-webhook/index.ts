@@ -19,7 +19,7 @@ const NAME_MAP: Record<string, string> = {
   "Property type": "property_type",
   "Postal code": "postal_code",
   "Project Photos": "photo_urls",
-  "Describe the Issue": "description",
+  "Describe the issue": "description",
 };
 
 Deno.serve(async (req) => {
@@ -50,6 +50,9 @@ Deno.serve(async (req) => {
         }
       }
     }
+
+    // Capture raw payload for debugging
+    row.raw_payload = payload;
 
     const { error } = await supabase.from("leads").insert(row);
 
