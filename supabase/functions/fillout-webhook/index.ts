@@ -5,20 +5,21 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SB_SERVICE_ROLE_KEY")!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// Map Fillout question ID → leads table column
-const FIELD_MAP: Record<string, string> = {
-  gBFz: "full_name",
-  "5M4s": "phone",
-  hHbY: "email",
-  jmOc: "service",
-  oF6y: "service_area",
-  fKbE: "timeline",
-  vRdb: "budget_range",
-  f3q8: "homeowner",
-  pOm7: "property_type",
-  "4vag": "postal_code",
-  "2Aa4": "photo_urls",
-  x1pw: "description",
+// Map Fillout question NAME → leads table column
+// Using names instead of IDs to avoid case-sensitivity issues with Fillout's random IDs
+const NAME_MAP: Record<string, string> = {
+  "Full Name": "full_name",
+  "Phone number": "phone",
+  "Email": "email",
+  "Service": "service",
+  "City/Service Area": "service_area",
+  "Timeline": "timeline",
+  "Budget range": "budget_range",
+  "Are you the homeowner?": "homeowner",
+  "Property type": "property_type",
+  "Postal code": "postal_code",
+  "Project Photos": "photo_urls",
+  "Describe the Issue": "description",
 };
 
 Deno.serve(async (req) => {
@@ -31,15 +32,17 @@ Deno.serve(async (req) => {
 
   try {
     const payload = await req.json();
+    console.log("Fillout payload:", JSON.stringify(payload));
     const questions = payload?.submission?.questions ?? [];
 
-    // Extract fields by question ID
+    // Extract fields by question name
     const row: Record<string, unknown> = {};
     for (const q of questions) {
-      const col = FIELD_MAP[q.id];
+      const col = NAME_MAP[q.name];
       if (col) {
         if (col === "homeowner") {
-          row[col] = q.value === "Yes" || q.value === true;
+          const val = typeof q.value === "string" ? q.value.toLowerCase() : "";
+          row[col] = val === "yes" || val === "true";
         } else if (col === "photo_urls") {
           row[col] = Array.isArray(q.value) ? q.value : [];
         } else {
