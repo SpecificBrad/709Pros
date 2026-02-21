@@ -8,3 +8,6 @@
 - [x] Fix question ID mismatches — refactored Edge Function to match by question **name** instead of ID
 - [x] Supabase MCP server configured and connected (project-scoped `.mcp.json`)
 - [x] Netlify MCP server connected
+- [x] Fillout → Edge Function → Supabase pipeline fully tested (all 12 fields populate correctly)
+- [x] Supabase + Netlify MCP servers configured locally
+- [x] Desktop Commander integration active for remote file access

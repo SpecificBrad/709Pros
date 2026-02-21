@@ -25,6 +25,20 @@
 - MCP config scoped to project lives in `<project>/.mcp.json`
 - Supabase MCP needs `SUPABASE_ACCESS_TOKEN` in env block
 
+## Desktop Commander (Feb 21 2026 — Hard Won)
+- **DO NOT use remote agent** (`npx ... remote`) — web Claude can't reach local DC
+- **DO NOT use npx in the DC command** — too slow, causes MCP handshake timeout
+- **Correct approach: direct node.exe** pointing to globally installed DC
+  - Install: `npm install -g @wonderwhy-er/desktop-commander`
+  - Config command: `C:\Program Files\nodejs\node.exe`
+  - Config args: `C:\Users\brad\AppData\Roaming\npm\node_modules\@wonderwhy-er\desktop-commander\dist\index.js`
+  - Add `"timeout": 60000` to the server entry in claude_desktop_config.json
+- **Delete the Extension-managed "Desktop Commander"** in Settings → Developer — it conflicts with the config-based entry
+- Only ONE DC entry should exist in Developer settings
+- DC initialization takes ~16 seconds on this machine — Claude was timing out at the default limit
+- High disk usage (100%) causes DC timeout — wait for disk to settle before starting Claude
+- Claude Desktop uses ~750MB RAM — close Chrome before starting if memory is tight
+
 ## Local Dev (Brad's Machine)
 - Claude Code: `claude` command in PowerShell
 - Git Bash path: `C:\Program Files\Git\bin\bash.exe`

@@ -1,16 +1,18 @@
 # Pending Work
 
-## Critical — Webhook Pipeline
-- [ ] **Fix Fillout field mapping** — only phone/homeowner/budget_range populate; other fields arrive NULL. Check Edge Function logs for actual question names sent by Fillout
-- [ ] Clean up test/junk rows in Supabase leads table (31 rows, mostly incomplete)
-- [ ] Tighten NOT NULL constraints after pipeline confirmed (full_name, phone, service, service_area)
+## Cleanup (Non-Critical)
+- [ ] Tighten NOT NULL constraints on leads table (full_name, phone, service, service_area)
+- [ ] Clean up test/junk rows in leads table (~31 rows from testing)
+- [ ] Remove debugging artifacts: `webhook_logs`, `raw_payload` columns
+- [ ] Delete Make.com scenario (ID: 4125813)
 
-## Cleanup
-- [ ] Remove `webhook_logs` and `raw_payload` debugging artifacts
-- [ ] Disable/delete Make.com scenario
-
-## Site Improvements
+## Content & UX
 - [ ] Create OG image (`/og-default.png`)
-- [ ] Replace testimonials placeholder with real content
+- [ ] Replace placeholder testimonials with real customer stories
 - [ ] Custom domain setup
-- [ ] Analytics/tracking integration
+- [ ] Analytics/tracking integration (Plausible, Fathom, or similar)
+
+## Future Expansion
+- [ ] Add more services (beyond current 8)
+- [ ] Add more service areas (beyond current 6 locations)
+- [ ] Lead routing/assignment system for contractors
