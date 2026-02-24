@@ -20,7 +20,7 @@
     "desktop-commander": {
       "command": "C:\\Program Files\\nodejs\\node.exe",
       "args": ["C:\\Users\\brad\\AppData\\Roaming\\npm\\node_modules\\@wonderwhy-er\\desktop-commander\\dist\\index.js"],
-      "timeout": 60000
+      "timeout": 120000
     }
   }
 }
@@ -52,4 +52,19 @@
 4. Confirm **supabase** shows **running**
 5. Go to Settings → Connectors → confirm **Netlify** and **GitHub** are connected
 6. Open the **709Pros project** in the left sidebar
-7. Tell Claude: "load project docs"
+7. Tell Claude: "load project docs" — Claude will read `_claude/03_next_actions.md` first, then load other `_claude/` files as needed
+
+## Memory System
+Session memory lives in `_claude/` in the repo — NOT in local docs.
+- `_claude/03_next_actions.md` — Claude reads this FIRST every session
+- `_claude/00_current_state.md` — project health
+- `_claude/01_architecture.md` — stack/structure reference
+- `_claude/02_environment.md` — URLs, keys, MCP config notes
+- `_claude/decisions/` — permanent decision log
+- `_claude/mistakes/` — permanent mistake log
+
+Type `/wrap` at end of session — Claude updates all files and commits to GitHub automatically.
+
+## Known Startup Warning
+"Could not load connectors directory" appears on launch — this is cosmetic, ignore it.
+Check Settings → Developer to confirm MCP servers are actually running.
