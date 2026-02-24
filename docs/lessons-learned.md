@@ -44,3 +44,11 @@
 - Git Bash path: `C:\Program Files\Git\bin\bash.exe`
 - Repo: `C:\Users\brad\Desktop\709Pros`
 - Env var needed: `$env:CLAUDE_CODE_GIT_BASH_PATH = "C:\Program Files\Git\bin\bash.exe"`
+
+## Token Management — CRITICAL
+- **CLAUDE.md is loaded every turn** — keep it under 40 lines. Move everything else to `docs/`
+- **All Claude Code models share the same Pro plan token quota** — Haiku isn't free, just cheaper per-token
+- **MCP tool definitions add hidden per-turn overhead** — only connect servers you're actively using
+- **Never debug infrastructure inside Claude Code** — edit JSON configs, dashboard settings, and MCP setup manually in terminal/editor. Save Claude for code.
+- **Minimize back-and-forth** — give Claude everything in one prompt. Each turn carries the full system prompt cost.
+- **Run `/doctor` first** when setting up MCP on Windows — it catches the `cmd /c` wrapper issue immediately

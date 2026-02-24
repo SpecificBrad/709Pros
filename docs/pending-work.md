@@ -1,18 +1,13 @@
 # Pending Work
 
-## Cleanup (Non-Critical)
+## Cleanup
 - [ ] Tighten NOT NULL constraints on leads table (full_name, phone, service, service_area)
-- [ ] Clean up test/junk rows in leads table (~31 rows from testing)
-- [ ] Remove debugging artifacts: `webhook_logs`, `raw_payload` columns
-- [ ] Delete Make.com scenario (ID: 4125813)
+- [ ] Remove `webhook_logs` and `raw_payload` debugging artifacts
+- [ ] Disable/delete Make.com scenario
+- [ ] Delete remaining test/junk rows from leads table
 
-## Content & UX
+## Site Improvements
 - [ ] Create OG image (`/og-default.png`)
-- [ ] Replace placeholder testimonials with real customer stories
+- [ ] Replace testimonials placeholder with real content
 - [ ] Custom domain setup
-- [ ] Analytics/tracking integration (Plausible, Fathom, or similar)
-
-## Future Expansion
-- [ ] Add more services (beyond current 8)
-- [ ] Add more service areas (beyond current 6 locations)
-- [ ] Lead routing/assignment system for contractors
+- [ ] Analytics/tracking integration
