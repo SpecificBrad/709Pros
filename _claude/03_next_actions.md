@@ -2,7 +2,7 @@
 _Read this file FIRST every session. Update at session END._
 
 ## 🔴 DO NEXT
-- [ ] Confirm DNS propagation — 709pros.com pointing to Netlify (started Feb 21, allow 48hrs)
+- [ ] Confirm DNS propagation — check 709pros.com is resolving (started Feb 21)
 - [ ] Analytics setup (Plausible or Fathom)
 - [ ] Create OG image (`/og-default.png`)
 
@@ -17,13 +17,14 @@ _Read this file FIRST every session. Update at session END._
 ## ✅ DONE
 - [x] Full pSEO site — 8 services × 6 locations = 66 pages
 - [x] Fillout → Edge Function → Supabase pipeline (all 12 fields)
-- [x] Custom domain 709pros.com added in Netlify, DNS set in Hostinger
+- [x] Custom domain 709pros.com — Netlify + Hostinger DNS configured
 - [x] DB cleanup — dropped webhook_logs, raw_payload, added NOT NULL constraints
-- [x] Desktop Commander MCP configured and working
+- [x] Desktop Commander MCP configured and working (timeout: 120000)
+- [x] Supabase MCP configured and working
+- [x] _claude/ memory system — persistent stateful session memory in GitHub
 
 ---
 ## Session Protocol
 1. Read THIS file first
 2. Load other _claude/ files only if needed
-3. Update this file + 00_current_state.md at END of session
-4. Commit changes: `cd C:\Users\brad\Desktop\709Pros && git add _claude/ && git commit -m "chore: update session memory" && git push`
+3. Type /wrap at end of session — Claude will update files and commit
