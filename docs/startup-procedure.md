@@ -14,7 +14,7 @@
     "supabase": {
       "command": "npx",
       "args": ["-y", "@supabase/mcp-server-supabase@latest",
-        "--access-token", "sbp_7e5f66752d0aa69ec604ba5830c5efb0a4cfb2c7",
+        "--access-token", "YOUR_SUPABASE_PAT_HERE",
         "--project-ref", "ajvitritgrzcauevljka"]
     },
     "desktop-commander": {
